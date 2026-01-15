@@ -16,8 +16,6 @@ function Map() {
 			attributionControl: false
 		});
 
-
-
 		return () => {  // don't question this clean up , its required. what if the component unmounts when toggled between 2d and 3d.
 			mapRef.current.remove();
 		};

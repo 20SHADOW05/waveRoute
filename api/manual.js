@@ -68,7 +68,9 @@ get_radiobrowser_base_urls().then(hosts => {
 /* 2. using round-robin DNS hostname
 
     A(address) record maps the IPv4 address of the hostname.
-    all.api.radio-browser.info is a round robin DNS (A hostname with multiple A records) created by the radio-browser maintainers. it is meant to return all known API servers. after it returns all the IPs of radio-browser api servers , we do a dns reverse lookup to get their hostnames.
+    all.api.radio-browser.info is a round robin DNS (a hostname with multiple A records) created by the radio-browser maintainers.
+    it is meant to return all known API servers. after it returns all the IPs of radio-browser api servers,
+    we do a dns reverse lookup to get their hostnames.
 
 */
 
