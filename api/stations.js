@@ -1,30 +1,19 @@
-const radioBrowser = require('radio-browser');
-const https = require('https');
+const axios = require('axios');
 
-// Patch the global agent to include user-agent
-const originalRequest = https.request;
-https.request = function(options, callback) {
-    if (!options.headers) options.headers = {};
-    options.headers['User-Agent'] = 'waveRoute/1.0';
-    return originalRequest.call(this, options, callback);
-};
+const fetchStations = async () => {
 
-const initialStations = async () => {
-    
-    let filter = {
-        limit: 200,
-        by: 'topvote'
-    }
+    let server_url = "https://de1.api.radio-browser.info";
+    const headers = {
+        'User-Agent': 'waveRoute/1.0 (angrymartian68@gmail.com)'
+    };
 
     try {
-        const data = await radioBrowser.getStations(filter);
-        console.log('data arrived');
-        return data;
+        const stationsData = await axios.get(`${server_url}` , { headers , timeout: 10000 });
+        console.log(stationsData);
+        console.log(stationsData.data);
     } catch(error) {
         console.log(error);
-        return [];
     }
+} 
 
-}
-
-module.exports = initialStations;
+module.exports = fetchStations;

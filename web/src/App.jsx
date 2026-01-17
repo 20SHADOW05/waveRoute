@@ -13,7 +13,7 @@ export default function Map() {
 
 		const getStationsData = async () => {
 			try {
-				const stationsDataPromise = await fetch('http://localhost:3000/initialStations'); // fetch returns a promise
+				const stationsDataPromise = await fetch('http://localhost:3000/'); // fetch returns a promise
 				let Data = await stationsDataPromise.json(); // this method is used to read and parse a http response (JSON.parse is only for json string)
 				Data.forEach(element => {
 					console.log(element);
