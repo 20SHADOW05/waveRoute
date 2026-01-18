@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 
 const NodeCache = require('node-cache');
-const myCache = new NodeCache( {stdTTL: 120 , checkperiod: 140} );
+const myCache = new NodeCache( {stdTTL: 7200 , checkperiod: 7220} );
 
 const fetchStations = require('./stations');
 
@@ -11,15 +11,19 @@ app.use(express.static('public'));
 app.use(express.urlencoded( { extended: true} ));
 app.use(cors({ origin: "http://localhost:5173" }));
 
-app.get('/' , async (req , res) => {
+app.get('/getStations' , async (req , res) => {
     try {
         if(myCache.has("stationsData")) {
-            console.log(myCache.get("stationsData"));
             console.log("GOT IT FROM CACHE");
+            return res.json(myCache.get("stationsData"));
         }
         else {
             const stationsData = await fetchStations();
-            myCache.set("stationsData" , stationsData);
+            if(stationsData != null){
+                myCache.set("stationsData" , stationsData);
+                return res.json(stationsData);
+            } 
+            else throw new Error("radio-browser api server error");
         }
     } catch (err) {
         console.error(err);

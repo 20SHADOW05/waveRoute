@@ -5,3 +5,16 @@
 body {
     background-color: #2E3039;
 }
+
+.maplibregl-popup .maplibregl-popup-content {
+  border: 1px solid grey;
+  border-radius: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.maplibregl-popup-tip {
+  display: none;
+}
+
+
