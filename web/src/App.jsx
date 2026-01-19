@@ -5,7 +5,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 export default function Map() {
 	const containerRef = useRef(null);
 	const mapRef = useRef(null);
-	let [stationsData , setStationsData] = useState(null)
+	let [stationsData , setStationsData] = useState(null);
+    const audioRef = useRef(null);
 
 
 	useEffect(() => {
@@ -46,91 +47,147 @@ export default function Map() {
   	} , []);
 
 	useEffect(() => {
-    if (!mapRef.current || !stationsData?.length) return;
-    
-    const map = mapRef.current;
-    
-    const addStations = () => {
-        if (map.getSource('stations')) {
-            map.removeLayer('station-points');
-            map.removeSource('stations');
+        if (!mapRef.current || !stationsData?.length) return;
+        
+        const map = mapRef.current;
+        
+        const addStations = () => {
+            if (map.getSource('stations')) {
+                map.removeLayer('station-points');
+                map.removeSource('stations');
+            }
+            
+            // Add GeoJSON source
+            map.addSource('stations', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: stationsData.map(station => ({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [parseFloat(station.geo_long), parseFloat(station.geo_lat)]
+                        },
+                        properties: {
+                            name: station.name.split('-').slice(0, 2).join(' - '),
+                            country: station.country,
+                            streamUrl: station.url_resolved || station.url  
+                        }
+                    }))
+                }
+            });
+            
+            map.addLayer({
+                id: 'station-points',
+                type: 'circle',
+                source: 'stations',
+                paint: {
+                    'circle-radius': 4,
+                    'circle-color': '#343435', 
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#ffffff'
+                }
+            });
+            
+            const popup = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            }).setMaxWidth("300px");
+
+            let currentFeatureCoordinates = undefined;
+            map.on('mousemove', 'station-points', (e) => { // thanks to mapLibre docs for this hover popup
+                const featureCoordinates = e.features[0].geometry.coordinates.toString();
+                if (currentFeatureCoordinates !== featureCoordinates) {
+                    currentFeatureCoordinates = featureCoordinates;
+
+                    // Change the cursor style as a UI indicator.
+                    map.getCanvas().style.cursor = 'pointer';
+
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const { name, country } = e.features[0].properties;
+
+                    // Ensure that if the map is zoomed out such that multiple
+                    // copies of the feature are visible, the popup appears
+                    // over the copy being pointed to.
+                    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                    }
+
+                    // Populate the popup and set its coordinates
+                    // based on the feature found.
+                    popup.setLngLat(coordinates).setHTML(`<strong>${name}</strong><br>${country || ''}`).addTo(map);
+                }
+            });
+
+            map.on('mouseleave', 'station-points', () => {
+                currentFeatureCoordinates = undefined;
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+            });
+        };
+        
+        if (map.isStyleLoaded()) {
+            addStations();
+        } else {
+            map.once('load', addStations);
         }
         
-        // Add GeoJSON source
-        map.addSource('stations', {
-            type: 'geojson',
-            data: {
-                type: 'FeatureCollection',
-                features: stationsData.map(station => ({
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Point',
-                        coordinates: [parseFloat(station.geo_long), parseFloat(station.geo_lat)]
-                    },
-                    properties: {
-                        name: station.name.split('-').slice(0, 2).join(' - '),
-                        country: station.country
-                    }
-                }))
+    }, [stationsData]);
+
+    useEffect(() => {
+        audioRef.current = new Audio();
+        audioRef.current.crossOrigin = "anonymous";
+        audioRef.current.preload = "none";
+
+        return () => {
+            audioRef.current?.pause();
+            audioRef.current = null;
+        };
+    }, []);
+
+
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        const map = mapRef.current;
+
+        const handleStationClick = (e) => {
+            console.log(e);
+            const feature = e.features?.[0];
+            if (!feature) return;
+
+            const { streamUrl, name } = feature.properties;
+            if (!streamUrl) return;
+
+            const audio = audioRef.current;
+
+            audio.pause();
+            let currentStream = audio.dataset.currentStream;
+            if (audio.dataset.currentStream !== streamUrl) {
+                audio.src = streamUrl;
+                audio.dataset.currentStream = streamUrl;
             }
-        });
-        
-        map.addLayer({
-            id: 'station-points',
-            type: 'circle',
-            source: 'stations',
-            paint: {
-                'circle-radius': 4,
-                'circle-color': '#343435', 
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#ffffff'
-            }
-        });
-        
-		const popup = new maplibregl.Popup({
-            closeButton: false,
-            closeOnClick: false
-        }).setMaxWidth("300px");
 
-		let currentFeatureCoordinates = undefined;
-        map.on('mousemove', 'station-points', (e) => { // thanks to mapLibre docs for this hover popup
-            const featureCoordinates = e.features[0].geometry.coordinates.toString();
-            if (currentFeatureCoordinates !== featureCoordinates) {
-                currentFeatureCoordinates = featureCoordinates;
+            if(currentStream != audio.dataset.currentStream) {
+                audio.play().catch(err => {
+                    console.error("Playback failed:", err);
+                });
+            } 
 
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
+            console.log("Now playing:", name);
+        };
 
-                const coordinates = e.features[0].geometry.coordinates.slice();
-                const { name, country } = e.features[0].properties;
+        const handleDoubleClick = (e) => { // temporary pause for until ui is coded
+            
+        }
 
-                // Ensure that if the map is zoomed out such that multiple
-                // copies of the feature are visible, the popup appears
-                // over the copy being pointed to.
-                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                }
+        map.on('click', 'station-points', handleStationClick);
 
-                // Populate the popup and set its coordinates
-                // based on the feature found.
-                popup.setLngLat(coordinates).setHTML(`<strong>${name}</strong><br>${country || ''}`).addTo(map);
-            }
-        });
+        return () => {
+            map.off('click', 'station-points', handleStationClick);
+        };
+    }, []);
 
-        map.on('mouseleave', 'station-points', () => {
-            currentFeatureCoordinates = undefined;
-            map.getCanvas().style.cursor = '';
-            popup.remove();
-        });
-    };
-    
-    if (map.isStyleLoaded()) {
-        addStations();
-    } else {
-        map.once('load', addStations);
-    }
-    
-}, [stationsData]);
 
 	return (
 		<>
