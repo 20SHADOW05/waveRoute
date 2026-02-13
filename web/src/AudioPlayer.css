@@ -1,0 +1,196 @@
+@import url('./index.css');
+
+.icons {
+  height: auto;
+  width: 24px;
+  color: var(--icon-color);
+  cursor: pointer;
+}
+
+a {
+  all: unset;
+  display: flex;
+}
+
+.overall-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px;
+}
+
+.t-h , .hi5 , .links , .theme-in {
+  display: flex;
+}
+
+.links {
+  gap: 12px;
+}
+
+.t-h {
+  gap: 24px;
+}
+
+.theme-in , .hi5 {
+  align-items: center;
+  gap: 8px;
+}
+
+.audio-player {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background-color: white;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    width: 300px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    gap: 24px;
+}
+
+/* Genre Selector */
+.genre-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 300px;
+    padding: 4px 0;
+    font-family: Poppins , 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.genre-arrow {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.genre-arrow:disabled {
+    cursor: not-allowed;
+}
+
+.genre-arrow:not(:disabled):hover {
+    opacity: 0.6;
+}
+
+.genre-list {
+    overflow: hidden;
+    width: 100%;
+}
+
+.genre-list-inner {
+    display: flex;
+    gap: 8px;
+    transition: transform 0.5s ease-in-out;
+}
+
+.each-genre {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #666;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 14px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-weight: 400;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.each-genre.active {
+    background-color: #000;
+    color: #fff;
+    border: none;
+}
+
+/* Station Info */
+.station-info {
+    padding: 4px 6px;
+    height: 5vh;
+}
+
+.station-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000;
+    max-width: 300px;
+}
+
+.station-location {
+    font-size: 14px;
+    color: #999;
+    margin: 0;
+}
+
+.station-name , .station-location {
+    overflow: hidden;     
+    white-space: nowrap;      
+    text-overflow: ellipsis;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px;
+}
+
+.control-btn , .volume-slider {
+    width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.icons-mini {
+    height: auto;
+    width: 20px;
+    color: var(--icon-color);
+    cursor: pointer;
+}
+
+.slider {
+    cursor: pointer;
+    accent-color: #000;
+    height: 4px;
+}
+
+.slider::-webkit-slider-thumb {
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    cursor: pointer;
+}
+
+/* Minimized Player */
+.audio-player.minimized {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 18px;
+}
+
+.audio-player.minimized .station-info {
+    width: 180px;
+}
+
+.inside-mini , .control-btn-mini {
+    display: flex;
+    gap: 12px;
+}

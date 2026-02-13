@@ -1,13 +1,17 @@
 import { useEffect , useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import CustomAudioPlayer from './audioPlayer.jsx';
 
 export default function Map() {
 	const containerRef = useRef(null);
 	const mapRef = useRef(null);
 	let [stationsData , setStationsData] = useState(null);
-    const audioRef = useRef(null);
-
+    const [currentStation, setCurrentStation] = useState({
+        name: '',
+        country: '',
+        state: ''
+    });
 
 	useEffect(() => {
 
@@ -71,6 +75,7 @@ export default function Map() {
                         properties: {
                             name: station.name.split('-').slice(0, 2).join(' - '),
                             country: station.country,
+                            state: station.state,
                             streamUrl: station.url_resolved || station.url  
                         }
                     }))
@@ -83,7 +88,7 @@ export default function Map() {
                 source: 'stations',
                 paint: {
                     'circle-radius': 4,
-                    'circle-color': '#343435', 
+                    'circle-color': 'rgb(80, 80, 80)', 
                     'circle-stroke-width': 1,
                     'circle-stroke-color': '#ffffff'
                 }
@@ -135,63 +140,24 @@ export default function Map() {
     }, [stationsData]);
 
     useEffect(() => {
-        audioRef.current = new Audio();
-        audioRef.current.crossOrigin = "anonymous";
-        audioRef.current.preload = "none";
-
-        return () => {
-            audioRef.current?.pause();
-            audioRef.current = null;
-        };
-    }, []);
-
-
-    useEffect(() => {
         if (!mapRef.current) return;
-
         const map = mapRef.current;
 
         const handleStationClick = (e) => {
-            console.log(e);
-            const feature = e.features?.[0];
-            if (!feature) return;
-
-            const { streamUrl, name } = feature.properties;
-            if (!streamUrl) return;
-
-            const audio = audioRef.current;
-
-            audio.pause();
-            let currentStream = audio.dataset.currentStream;
-            if (audio.dataset.currentStream !== streamUrl) {
-                audio.src = streamUrl;
-                audio.dataset.currentStream = streamUrl;
-            }
-
-            if(currentStream != audio.dataset.currentStream) {
-                audio.play().catch(err => {
-                    console.error("Playback failed:", err);
-                });
-            } 
-
-            console.log("Now playing:", name);
-        };
-
-        const handleDoubleClick = (e) => { // temporary pause for until ui is coded
-            
+           setCurrentStation(e.features[0].properties);
         }
 
-        map.on('click', 'station-points', handleStationClick);
+        map.on('click' , 'station-points' , handleStationClick);
 
         return () => {
             map.off('click', 'station-points', handleStationClick);
         };
-    }, []);
-
+    } , [])
 
 	return (
 		<>
-			<div ref={containerRef} style={{ width: '100vw', height: '99.5vh'}}> </div>	
+			<div ref={containerRef} style={{ position: 'absolute', width: '100vw', height: '99.5vh'}}> </div>
+            <CustomAudioPlayer currentStation={ currentStation } />
 		</>
 	);
 }
