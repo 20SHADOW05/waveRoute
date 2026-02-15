@@ -6,9 +6,9 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { FiHeadphones , FiRadio , FiZap , FiWind , FiFeather , FiDisc , FiActivity , FiSun } from "react-icons/fi";
 import { FiMinimize2 } from "react-icons/fi";
 
-function Theme({ mode }) {
+function Theme({ toggleTheme ,  mode }) {
     return (
-        <div className="z theme-in">
+        <div onClick={ toggleTheme } className="z theme-in">
             {
                 { mode } == true ? <MdDarkMode className="icons"/> : <MdLightMode className="icons"/>
             }
@@ -40,22 +40,15 @@ function HiFive() {
     );
 }
 
-function CustomAPtop({ setIsExpanded }) {
-    const [darkMode, setDarkMode] = useState(false);
-
-    function toggleTheme() {
-        const html = document.documentElement;
-        html.classList.toggle("dark");
-        setDarkMode(!darkMode);
-    }
-
+function CustomAPtop({ setIsExpanded , toggleTheme , darkMode }) {
+    
     return (
         <>
             <div className='overall-top'>
                 <Links />
                 <div className='t-h'>
                     <HiFive />
-                    <Theme onClick={ toggleTheme } mode={ darkMode } />
+                    <Theme toggleTheme={ toggleTheme } mode={ darkMode } />
                     <div style={{ display: 'flex' }} onClick={() => setIsExpanded(false)} >
                         <FiMinimize2 className="icons-mini theme-in" />
                     </div>

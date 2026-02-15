@@ -3,7 +3,7 @@ import { FiPlay , FiPause , FiMaximize2 , FiVolumeX , FiVolume2 } from "react-ic
 import { CustomAPtop , GenreCarousel , StationInfo } from './otherUi';
 import './AudioPlayer.css'
 
-function CustomAudioPlayer({ currentStation }) {
+function CustomAudioPlayer({ currentStation  , toggleTheme , darkMode }) {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(0.5);
@@ -54,7 +54,7 @@ function CustomAudioPlayer({ currentStation }) {
     if (isExpanded) {
         return (
             <div className="audio-player expanded z">
-                <CustomAPtop setIsExpanded={ setIsExpanded }/>
+                <CustomAPtop setIsExpanded={ setIsExpanded } toggleTheme={ toggleTheme } darkMode={ darkMode } />
 
                 <GenreCarousel />
                 
@@ -135,4 +135,4 @@ function CustomAudioPlayer({ currentStation }) {
 //         };
 //     }, []);
 
-export default CustomAudioPlayer;
+export { CustomAudioPlayer };

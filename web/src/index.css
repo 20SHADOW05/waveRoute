@@ -3,49 +3,41 @@
 }
 
 :root {
-  --background: 0 0% 99%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 90%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 75.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
+  --background: hsl(0 0% 91%);
+  --foreground: hsl(0, 1%, 16%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0 0% 3.9%);
+  --primary: hsl(0 0% 9%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(0 0% 96.1%);
+  --secondary-foreground: hsl(0 0% 9%);
+  --muted: hsl(0 0% 96.1%);
+  --muted-foreground: hsl(0, 3%, 70%);
+  --accent: hsl(0 0% 96.1%);
+  --accent-foreground: hsl(0 0% 9%);
+  --border: hsl(0 0% 75.8%);
+  --input: hsl(0 0% 89.8%);
   --radius: 0.5rem;
   --icon-color: rgb(80, 80, 80);
 }
 
 .dark {
-  --background: 0 0% 9%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 12%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 12%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 22%;
-  --input: 0 0% 20%;
-  --ring: 0 0% 83.1%;
+  --background: hsl(0 0% 9%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(0 0% 12%);
+  --card-foreground: hsl(0 0% 98%);
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(0 0% 9%);
+  --secondary: hsl(0 0% 14.9%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(0 0% 14.9%);
+  --muted-foreground: hsl(0 0% 63.9%);
+  --accent: hsl(0 0% 14.9%);
+  --accent-foreground: hsl(0 0% 98%);
+  --border: hsl(0 0% 22%);
+  --input: hsl(0 0% 20%);
+  --ring: hsl(0 0% 83.1%);
+  --icon-color: rgb(226, 226, 226);
 }
 
 @font-face {
@@ -69,13 +61,16 @@
 body {
   background-color: #2E3039;
   font-family: noto , 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--foreground);
 }
 
 .maplibregl-popup .maplibregl-popup-content {
-  border: 1px solid grey;
-  border-radius: 4px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  border: 1px solid var(--muted-foreground);
+  border-radius: var(--radius);
+  background-color: var(--accent);
+  padding: 12px;
+  font-size: 0.8rem;
+  font-family: noto , 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .maplibregl-popup-tip {

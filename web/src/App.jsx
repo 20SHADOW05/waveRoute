@@ -1,9 +1,10 @@
 import { useEffect , useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import CustomAudioPlayer from './audioPlayer.jsx';
+import { CustomAudioPlayer } from './audioPlayer.jsx';
 
 export default function Map() {
+    const [darkMode, setDarkMode] = useState(false);
 	const containerRef = useRef(null);
 	const mapRef = useRef(null);
 	let [stationsData , setStationsData] = useState(null);
@@ -12,6 +13,13 @@ export default function Map() {
         country: '',
         state: ''
     });
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        html.classList.toggle("dark");
+        setDarkMode(!darkMode);
+    }
+
 
 	useEffect(() => {
 
@@ -36,7 +44,9 @@ export default function Map() {
 
 		mapRef.current = new maplibregl.Map({
 			container: containerRef.current,
-			style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', // dark mode --> https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json
+			style: document.documentElement.classList.contains('dark') 
+                    ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+                    : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
 			zoom: 0,
 			renderWorldCopies: false,
 			attributionControl: false,
@@ -48,7 +58,7 @@ export default function Map() {
 			mapRef.current.remove();
 		};
 
-  	} , []);
+  	} , [darkMode]);
 
 	useEffect(() => {
         if (!mapRef.current || !stationsData?.length) return;
@@ -86,12 +96,19 @@ export default function Map() {
                 id: 'station-points',
                 type: 'circle',
                 source: 'stations',
-                paint: {
-                    'circle-radius': 4,
-                    'circle-color': 'rgb(80, 80, 80)', 
-                    'circle-stroke-width': 1,
-                    'circle-stroke-color': '#ffffff'
-                }
+                paint: document.documentElement.classList.contains('dark') ?
+                        {
+                            'circle-radius': 4,
+                            'circle-color': 'rgb(190, 190, 190)', 
+                            'circle-stroke-width': 1,
+                            'circle-stroke-color': '#000000'
+                        } 
+                        : {
+                            'circle-radius': 4,
+                            'circle-color': 'rgb(80, 80, 80)', 
+                            'circle-stroke-width': 1,
+                            'circle-stroke-color': '#ffffff'
+                        } 
             });
             
             const popup = new maplibregl.Popup({
@@ -120,7 +137,8 @@ export default function Map() {
 
                     // Populate the popup and set its coordinates
                     // based on the feature found.
-                    popup.setLngLat(coordinates).setHTML(`<strong>${name}</strong><br>${country || ''}`).addTo(map);
+                    popup.setLngLat(coordinates).setHTML(`${name} 
+                        <div class="cName">${country || ''}</div>`).addTo(map);
                 }
             });
 
@@ -137,7 +155,7 @@ export default function Map() {
             map.once('load', addStations);
         }
         
-    }, [stationsData]);
+    }, [stationsData , darkMode]);
 
     useEffect(() => {
         if (!mapRef.current) return;
@@ -157,7 +175,7 @@ export default function Map() {
 	return (
 		<>
 			<div ref={containerRef} style={{ position: 'absolute', width: '100vw', height: '99.5vh'}}> </div>
-            <CustomAudioPlayer currentStation={ currentStation } />
+            <CustomAudioPlayer currentStation={ currentStation } toggleTheme={ toggleTheme } darkMode={ darkMode } />
 		</>
 	);
 }
