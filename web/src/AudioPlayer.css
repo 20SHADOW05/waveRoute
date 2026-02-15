@@ -5,6 +5,7 @@
   width: 24px;
   color: var(--icon-color);
   cursor: pointer;
+  padding: 4px;
 }
 
 a {
@@ -24,11 +25,11 @@ a {
 }
 
 .links {
-  gap: 12px;
+  gap: 4px;
 }
 
 .t-h {
-  gap: 24px;
+  gap: 16px;
 }
 
 .theme-in , .hi5 {
@@ -36,11 +37,16 @@ a {
   gap: 8px;
 }
 
-.icons-mini {
+.icons-mini , .icons-mini-spl {
     height: auto;
     width: 20px;
     color: var(--icon-color);
     cursor: pointer;
+    padding: 4px;
+}
+
+.icons-mini-spl {
+    padding: 0;
 }
 
 .audio-player {
@@ -60,6 +66,9 @@ a {
     justify-content: space-evenly;
     gap: 24px;
     border: 2px dashed var(--muted-foreground);
+    height: 240px;
+    transition: height 450ms cubic-bezier(.34,1.56,.64,1);
+    overflow: hidden;
 }
 
 /* Genre Selector */
@@ -124,7 +133,7 @@ a {
     border: none;
 }
 
-.each-genre.active .icons-mini{
+.each-genre.active .icons-mini-spl {
   color: var(--muted);
 }
 
@@ -189,13 +198,54 @@ a {
     justify-content: space-between;
     align-items: center;
     padding: 9px 18px;
+    height: 60px;
 }
 
 .audio-player.minimized .station-info {
     width: 180px;
 }
 
-.inside-mini , .control-btn-mini {
+.audio-player.minimized  .inside-mini , .control-btn-mini {
     display: flex;
     gap: 12px;
+}
+
+.error-toast {
+    position: fixed;
+    top: 80px;  /* Changed from bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(239, 68, 68, 0.95);
+    color: white;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease-out, fadeOut 0.5s ease-in 2.5s;  /* Changed to slideDown */
+    min-width: max-content;
+    max-width: 80vw;
+    text-align: center;
+}
+
+@keyframes slideDown {  /* Changed from slideUp */
+    from {
+        transform: translateX(-50%) translateY(-20px);  /* Slide from top */
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+.icons:hover , .icons-mini:hover {
+    background-color: var(--hover);
+    border-radius: 6px;
 }

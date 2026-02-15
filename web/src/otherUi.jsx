@@ -3,8 +3,7 @@ import { FaLinkedin } from "react-icons/fa6";
 import { LuHand , LuMail } from "react-icons/lu";
 import { MdDarkMode , MdLightMode } from "react-icons/md";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
-import { FiHeadphones , FiRadio , FiZap , FiWind , FiFeather , FiDisc , FiActivity , FiSun } from "react-icons/fi";
-import { FiMinimize2 } from "react-icons/fi";
+import { FiHeadphones , FiRadio , FiZap , FiWind , FiFeather , FiDisc , FiActivity , FiSun , FiMinimize2 , FiMaximize2 , FiPlay , FiPause , FiVolumeX , FiVolume2 } from "react-icons/fi";
 
 function Theme({ toggleTheme ,  mode }) {
     return (
@@ -40,85 +39,87 @@ function HiFive() {
     );
 }
 
-function CustomAPtop({ setIsExpanded , toggleTheme , darkMode }) {
-    
-    return (
-        <>
-            <div className='overall-top'>
-                <Links />
-                <div className='t-h'>
-                    <HiFive />
-                    <Theme toggleTheme={ toggleTheme } mode={ darkMode } />
-                    <div style={{ display: 'flex' }} onClick={() => setIsExpanded(false)} >
-                        <FiMinimize2 className="icons-mini theme-in" />
+function CustomAPtop({ isExpanded , setIsExpanded , toggleTheme , darkMode }) {
+    if(isExpanded){
+        return (
+            <>
+                <div className='overall-top'>
+                    <Links />
+                    <div className='t-h'>
+                        <HiFive />
+                        <Theme toggleTheme={ toggleTheme } mode={ darkMode } />
+                        <div style={{ display: 'flex' }} onClick={() => setIsExpanded(false)} >
+                            <FiMinimize2 className="icons-mini theme-in" />
+                        </div>
                     </div>
                 </div>
-            </div>
-        </> 
-    );
+            </> 
+        );
+    }
 }
 
-function GenreCarousel(){
-    const [selectedGenre, setSelectedGenre] = useState('All');
+function GenreCarousel({ isExpanded }){
+    if(isExpanded){
+        const [selectedGenre, setSelectedGenre] = useState('All');
     
-    const GENRES = [
-        { genre: 'All', icon: FiHeadphones },
-        { genre: 'Pop', icon: FiRadio },
-        { genre: 'Rock', icon: FiZap },
-        { genre: 'Jazz', icon: FiWind },
-        { genre: 'Classical', icon: FiFeather },
-        { genre: 'Hip Hop', icon: FiDisc },
-        { genre: 'Electronic', icon: FiActivity },
-        { genre: 'Folk', icon: FiSun },
-    ];
-    const [genreStartIndex, setGenreStartIndex] = useState(0);
-    const visibleGenres = 3;
-    const slideAmount = 98;
+        const GENRES = [
+            { genre: 'All', icon: FiHeadphones },
+            { genre: 'Pop', icon: FiRadio },
+            { genre: 'Rock', icon: FiZap },
+            { genre: 'Jazz', icon: FiWind },
+            { genre: 'Classical', icon: FiFeather },
+            { genre: 'Hip Hop', icon: FiDisc },
+            { genre: 'Electronic', icon: FiActivity },
+            { genre: 'Folk', icon: FiSun },
+        ];
+        const [genreStartIndex, setGenreStartIndex] = useState(0);
+        const visibleGenres = 3;
+        const slideAmount = 98;
 
-    const scrollGenresLeft = () => {
-        if (genreStartIndex > 0) {
-            setGenreStartIndex(genreStartIndex - 1);
-        }
-    };
+        const scrollGenresLeft = () => {
+            if (genreStartIndex > 0) {
+                setGenreStartIndex(genreStartIndex - 1);
+            }
+        };
 
-    const scrollGenresRight = () => {
-        if (genreStartIndex < GENRES.length - visibleGenres) {
-            setGenreStartIndex(genreStartIndex + 1);
-        }
-    };
+        const scrollGenresRight = () => {
+            if (genreStartIndex < GENRES.length - visibleGenres) {
+                setGenreStartIndex(genreStartIndex + 1);
+            }
+        };
 
-    return (
-        <div className="genre-selector">  {/* genre selector */}
-             <button onClick={scrollGenresLeft} disabled={genreStartIndex === 0} className="genre-arrow">
-                <FaChevronLeft />
-            </button>
-        
-            <div className="genre-list">
-                <div className="genre-list-inner"
-                    style={{
-                        transform: `translateX(-${genreStartIndex * slideAmount}px)`
-                    }}>
-                    {GENRES.map(({ genre, icon: Icon }) => (
-                        <div key={genre} 
-                            onClick={() => setSelectedGenre(genre)} 
-                            className={`each-genre ${selectedGenre === genre ? 'active' : ''}`}
-                        >
-                            <Icon className="icons-mini" />
-                            <div>{genre}</div>
-                        </div>
-                    ))}
-                 </div>
+        return (
+            <div className="genre-selector">  {/* genre selector */}
+                <button onClick={scrollGenresLeft} disabled={genreStartIndex === 0} className="genre-arrow">
+                    <FaChevronLeft />
+                </button>
+            
+                <div className="genre-list">
+                    <div className="genre-list-inner"
+                        style={{
+                            transform: `translateX(-${genreStartIndex * slideAmount}px)`
+                        }}>
+                        {GENRES.map(({ genre, icon: Icon }) => (
+                            <div key={genre} 
+                                onClick={() => setSelectedGenre(genre)} 
+                                className={`each-genre ${selectedGenre === genre ? 'active' : ''}`}
+                            >
+                                <Icon className="icons-mini-spl" />
+                                <div>{genre}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            
+                <button onClick={scrollGenresRight} disabled={genreStartIndex >= GENRES.length - visibleGenres} className="genre-arrow">
+                    <FaChevronRight />
+                </button>
             </div>
-        
-            <button onClick={scrollGenresRight} disabled={genreStartIndex >= GENRES.length - visibleGenres} className="genre-arrow">
-                <FaChevronRight />
-            </button>
-        </div>
-    )
+        )
+    }
 }
 
-function StationInfo({ currentStation , displayState = true }){
-    
+function StationInfo({ currentStation , isExpanded }){
     if(currentStation.name == ''){
         return (
             <div style={{ padding: '6px' }}>
@@ -131,10 +132,49 @@ function StationInfo({ currentStation , displayState = true }){
         <div className="station-info">
             <div className="station-name">{currentStation?.name}</div>
             <div className="station-location">
-                {currentStation.state == undefined || displayState == true ? `${currentStation.state}, ${currentStation.country}` : currentStation.country}
+                { currentStation.state == undefined || currentStation.state == "" || isExpanded == false ? `${currentStation.country}` : `${currentStation.state}, ${currentStation.country}` }
             </div>
         </div>
     )
 }
- 
-export { CustomAPtop , GenreCarousel , StationInfo };
+
+function MiniAudio({ isExpanded , togglePlayPause , isPlaying , setIsExpanded }){
+    if(!isExpanded){
+        return (
+            <>
+                <div className="inside-mini">
+                    <div onClick={togglePlayPause} className="control-btn-mini">
+                        {isPlaying ? <FiPause className="icons-mini" /> : <FiPlay className="icons-mini" />}
+                    </div>
+
+                    <div onClick={() => setIsExpanded(true)} className="control-btn-mini">
+                        <FiMaximize2 className="icons-mini" />
+                    </div>
+                </div>
+            </>
+        )
+    }
+}
+
+function Controls({ isExpanded , togglePlayPause , isPlaying , volume , isMuted , handleVolumeChange }){
+    if(isExpanded){
+        return (
+            <div className="controls z">
+                <div onClick={togglePlayPause} className="control-btn">
+                    {isPlaying ? <FiPause className='icons-mini'/> : <FiPlay className='icons-mini'/>}
+                </div>
+
+                <div className="control-btn">
+                    <div style={{ display: 'flex' }}>
+                        {isMuted ? <FiVolumeX className='icons-mini'/> : <FiVolume2 className='icons-mini'/>}
+                    </div>
+                    <div className="volume-slider">
+                        <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange}className="slider" />
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
+
+export { CustomAPtop , GenreCarousel , StationInfo , MiniAudio , Controls };

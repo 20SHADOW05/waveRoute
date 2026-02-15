@@ -4,22 +4,16 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { CustomAudioPlayer } from './audioPlayer.jsx';
 
 export default function Map() {
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(true);
 	const containerRef = useRef(null);
 	const mapRef = useRef(null);
 	let [stationsData , setStationsData] = useState(null);
-    const [currentStation, setCurrentStation] = useState({
-        name: '',
-        country: '',
-        state: ''
-    });
 
     function toggleTheme() {
         const html = document.documentElement;
         html.classList.toggle("dark");
         setDarkMode(!darkMode);
     }
-
 
 	useEffect(() => {
 
@@ -40,25 +34,33 @@ export default function Map() {
 
 	} , [])
 
-	useEffect(() => {
+	// Remove darkMode from map initialization useEffect
+    useEffect(() => {
+        mapRef.current = new maplibregl.Map({
+            container: containerRef.current,
+            style: document.documentElement.classList.contains('dark') 
+                ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+                : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+            zoom: 0,
+            renderWorldCopies: false,
+            attributionControl: false,
+            pitchWithRotate: false,
+            dragRotate: false
+        });
 
-		mapRef.current = new maplibregl.Map({
-			container: containerRef.current,
-			style: document.documentElement.classList.contains('dark') 
-                    ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
-                    : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-			zoom: 0,
-			renderWorldCopies: false,
-			attributionControl: false,
-			pitchWithRotate: false,
-  			dragRotate: false
-		});
+        return () => {
+            mapRef.current.remove();
+        };
+    }, []);
 
-		return () => {  // don't question this clean up , its required. what if the component unmounts when toggled between 2d and 3d.
-			mapRef.current.remove();
-		};
-
-  	} , [darkMode]);
+    useEffect(() => {
+        if (!mapRef.current) return;
+        const newStyle = darkMode 
+            ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+            : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
+        
+        mapRef.current.setStyle(newStyle);
+    }, [darkMode]);
 
 	useEffect(() => {
         if (!mapRef.current || !stationsData?.length) return;
@@ -135,8 +137,7 @@ export default function Map() {
                         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                     }
 
-                    // Populate the popup and set its coordinates
-                    // based on the feature found.
+                    // Populate the popup and set its coordinates based on the feature found.
                     popup.setLngLat(coordinates).setHTML(`${name} 
                         <div class="cName">${country || ''}</div>`).addTo(map);
                 }
@@ -149,33 +150,26 @@ export default function Map() {
             });
         };
         
+        // Listen for style changes (when theme toggles)
+        map.on('style.load', addStations);
+        
+        // Add stations on initial load
         if (map.isStyleLoaded()) {
             addStations();
         } else {
             map.once('load', addStations);
         }
         
-    }, [stationsData , darkMode]);
-
-    useEffect(() => {
-        if (!mapRef.current) return;
-        const map = mapRef.current;
-
-        const handleStationClick = (e) => {
-           setCurrentStation(e.features[0].properties);
-        }
-
-        map.on('click' , 'station-points' , handleStationClick);
-
         return () => {
-            map.off('click', 'station-points', handleStationClick);
+            map.off('style.load', addStations);
         };
-    } , [])
+        
+    }, [stationsData , darkMode]);
 
 	return (
 		<>
 			<div ref={containerRef} style={{ position: 'absolute', width: '100vw', height: '99.5vh'}}> </div>
-            <CustomAudioPlayer currentStation={ currentStation } toggleTheme={ toggleTheme } darkMode={ darkMode } />
+            <CustomAudioPlayer toggleTheme={ toggleTheme } darkMode={ darkMode } mapRef={ mapRef.current } />
 		</>
 	);
 }

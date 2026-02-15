@@ -1,14 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiPlay , FiPause , FiMaximize2 , FiVolumeX , FiVolume2 } from "react-icons/fi";
-import { CustomAPtop , GenreCarousel , StationInfo } from './otherUi';
+import { CustomAPtop , GenreCarousel , StationInfo , MiniAudio , Controls } from './otherUi';
 import './AudioPlayer.css'
 
-function CustomAudioPlayer({ currentStation  , toggleTheme , darkMode }) {
+function CustomAudioPlayer({ toggleTheme , darkMode , mapRef }) {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [volume, setVolume] = useState(0.5);
+    const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [currentStation, setCurrentStation] = useState({
+        name: '',
+        country: '',
+        state: '',
+        streamUrl: ''
+    });
     
 
     useEffect(() => {
@@ -34,12 +40,6 @@ function CustomAudioPlayer({ currentStation  , toggleTheme , darkMode }) {
         }
     };
 
-    const toggleMute = () => {
-        const audio = audioRef.current;
-        audio.muted = !isMuted;
-        setIsMuted(!isMuted);
-    };
-
     const handleVolumeChange = (e) => {
         const newVolume = parseFloat(e.target.value);
         setVolume(newVolume);
@@ -51,88 +51,70 @@ function CustomAudioPlayer({ currentStation  , toggleTheme , darkMode }) {
         }
     };
 
-    if (isExpanded) {
-        return (
-            <div className="audio-player expanded z">
-                <CustomAPtop setIsExpanded={ setIsExpanded } toggleTheme={ toggleTheme } darkMode={ darkMode } />
+    useEffect(() => {
+        if (!mapRef) return;
 
-                <GenreCarousel />
-                
-                <StationInfo currentStation={ currentStation } />
+        const map = mapRef;
 
-                {/* Control Buttons */}
-                <div className="controls z">
-                    <div onClick={togglePlayPause} className="control-btn">
-                        {isPlaying ? <FiPause className='icons-mini'/> : <FiPlay className='icons-mini'/>}
-                    </div>
+        const handleStationClick = (e) => {
+            const feature = e.features?.[0];
+            if (!feature) return;
 
-                    <div className="control-btn">
-                        <div style={{ display: 'flex' }} onClick={toggleMute}>
-                            {isMuted ? <FiVolumeX className='icons-mini'/> : <FiVolume2 className='icons-mini'/>}
-                        </div>
-                        <div className="volume-slider">
-                            <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="slider" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+            const { streamUrl, name } = feature.properties;
+            if (!streamUrl) return;
 
-    // Minimized Player
+            setErrorMessage(''); // Clear error
+            setCurrentStation(feature.properties);
+
+            const audio = audioRef.current;
+            const currentStream = audio.dataset.currentStream;
+
+            // Always try to play if it's the same broken station OR new station
+            if (currentStream !== streamUrl || !isPlaying) {
+                audio.pause();
+                audio.src = streamUrl;
+                audio.dataset.currentStream = streamUrl;
+                audio.play().catch(err => {
+                    console.error("Playback failed:", err);
+                    setErrorMessage(`Cannot play "${name}" - Stream unavailable`);
+                    setIsPlaying(false);
+                    
+                    setTimeout(() => setErrorMessage(''), 3000);
+                });
+                setIsPlaying(true);
+            } else {
+                // Only toggle if same station AND currently playing
+                togglePlayPause();
+            }
+        };
+
+        map.on('click', 'station-points', handleStationClick);
+
+        return () => {
+            map.off('click', 'station-points', handleStationClick);
+        };
+    }, [mapRef]);
+
     return (
-        <div className="audio-player minimized z">
-            <StationInfo currentStation={ currentStation } displayState={ false }/>
+        <>
+            <div className={`audio-player ${isExpanded ? '' : 'minimized'}`}>
+                <CustomAPtop isExpanded={ isExpanded } setIsExpanded={ setIsExpanded } toggleTheme={ toggleTheme } darkMode={ darkMode } />
 
-            <div className="inside-mini">
-                <div onClick={togglePlayPause} className="control-btn-mini">
-                    {isPlaying ? <FiPause className="icons-mini" /> : <FiPlay className="icons-mini" />}
-                </div>
+                <GenreCarousel isExpanded={ isExpanded } />
+                    
+                <StationInfo isExpanded={ isExpanded } currentStation={ currentStation } />
 
-                <div onClick={() => setIsExpanded(true)} className="control-btn-mini">
-                    <FiMaximize2 className="icons-mini" />
-                </div>
+                <Controls isExpanded={ isExpanded } togglePlayPause={ togglePlayPause } isPlaying={ isPlaying } volume={ volume } isMuted={ isMuted } handleVolumeChange={ handleVolumeChange } />
+
+                <MiniAudio isExpanded={ isExpanded } currentStation={ currentStation } togglePlayPause={ togglePlayPause } isPlaying={ isPlaying } setIsExpanded={ setIsExpanded } />
             </div>
-        </div>
-    );
+            {errorMessage && (
+                <div className="error-toast">
+                    {errorMessage}
+                </div>
+            )}
+        </>
+    )
 }
-
-// useEffect(() => {
-//         if (!mapRef.current) return;
-
-//         const map = mapRef.current;
-
-//         const handleStationClick = (e) => {
-//             console.log(e);
-//             const feature = e.features?.[0];
-//             if (!feature) return;
-
-//             const { streamUrl, name } = feature.properties;
-//             if (!streamUrl) return;
-
-//             const audio = audioRef.current;
-
-//             audio.pause();
-//             let currentStream = audio.dataset.currentStream;
-//             if (audio.dataset.currentStream !== streamUrl) {
-//                 audio.src = streamUrl;
-//                 audio.dataset.currentStream = streamUrl;
-//             }
-
-//             if(currentStream != audio.dataset.currentStream) {
-//                 audio.play().catch(err => {
-//                     console.error("Playback failed:", err);
-//                 });
-//             } 
-
-//             console.log("Now playing:", name);
-//         };
-
-//         map.on('click', 'station-points', handleStationClick);
-
-//         return () => {
-//             map.off('click', 'station-points', handleStationClick);
-//         };
-//     }, []);
 
 export { CustomAudioPlayer };
