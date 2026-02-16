@@ -25,7 +25,7 @@ a {
 }
 
 .links {
-  gap: 4px;
+  gap: 8px;
 }
 
 .t-h {
@@ -34,7 +34,7 @@ a {
 
 .theme-in , .hi5 {
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .icons-mini , .icons-mini-spl {

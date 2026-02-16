@@ -10,7 +10,7 @@ const fetchStations = async () => {
     };
 
     try {
-        const stationsData = await axios.get(`${server_url}/json/stations/search?limit=200&hidebroken=true&has_geo_info=true` , { headers , timeout: 10000 });
+        const stationsData = await axios.get(`${server_url}/json/stations/search?limit=5000&hidebroken=true&has_geo_info=true&order=clickcount&reverse=true` , { headers , timeout: 20000 });
         console.log(stationsData);
         console.log("DATA FETCHED");
         return stationsData.data;

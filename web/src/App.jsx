@@ -21,9 +21,7 @@ export default function Map() {
 			try {
 				const stationsDataPromise = await fetch('http://localhost:3000/getStations'); // fetch returns a promise
 				let Data = await stationsDataPromise.json(); // this method is used to read and parse a http response (JSON.parse is only for json string)
-				Data.forEach(element => {
-					console.log(element);
-				});
+				console.log(Data.length);
 				setStationsData(Data);
 			} catch(error) {
 				console.log(error);
@@ -101,7 +99,7 @@ export default function Map() {
                 paint: document.documentElement.classList.contains('dark') ?
                         {
                             'circle-radius': 4,
-                            'circle-color': 'rgb(190, 190, 190)', 
+                            'circle-color': 'rgb(210, 210, 210)', 
                             'circle-stroke-width': 1,
                             'circle-stroke-color': '#000000'
                         } 
