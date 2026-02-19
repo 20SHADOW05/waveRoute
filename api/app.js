@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 
 const NodeCache = require('node-cache');
-const myCache = new NodeCache( {stdTTL: 7200 , checkperiod: 7220} );
+const myCache = new NodeCache( {stdTTL: 86400 , checkperiod: 86420} );
 
 const fetchStations = require('./stations');
 

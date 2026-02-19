@@ -16,12 +16,11 @@ export default function Map() {
     }
 
 	useEffect(() => {
-
 		const getStationsData = async () => {
 			try {
 				const stationsDataPromise = await fetch('http://localhost:3000/getStations'); // fetch returns a promise
 				let Data = await stationsDataPromise.json(); // this method is used to read and parse a http response (JSON.parse is only for json string)
-				console.log(Data.length);
+				console.log(Data.data.features.length);
 				setStationsData(Data);
 			} catch(error) {
 				console.log(error);
@@ -29,7 +28,6 @@ export default function Map() {
 		}
 
 		getStationsData();
-
 	} , [])
 
 	// Remove darkMode from map initialization useEffect
@@ -61,7 +59,7 @@ export default function Map() {
     }, [darkMode]);
 
 	useEffect(() => {
-        if (!mapRef.current || !stationsData?.length) return;
+        if (!mapRef.current || !stationsData?.data?.features?.length) return;
         
         const map = mapRef.current;
         
@@ -72,25 +70,7 @@ export default function Map() {
             }
             
             // Add GeoJSON source
-            map.addSource('stations', {
-                type: 'geojson',
-                data: {
-                    type: 'FeatureCollection',
-                    features: stationsData.map(station => ({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Point',
-                            coordinates: [parseFloat(station.geo_long), parseFloat(station.geo_lat)]
-                        },
-                        properties: {
-                            name: station.name.split('-').slice(0, 2).join(' - '),
-                            country: station.country,
-                            state: station.state,
-                            streamUrl: station.url_resolved || station.url  
-                        }
-                    }))
-                }
-            });
+            map.addSource('stations', stationsData);
             
             map.addLayer({
                 id: 'station-points',
@@ -128,9 +108,7 @@ export default function Map() {
                     const coordinates = e.features[0].geometry.coordinates.slice();
                     const { name, country } = e.features[0].properties;
 
-                    // Ensure that if the map is zoomed out such that multiple
-                    // copies of the feature are visible, the popup appears
-                    // over the copy being pointed to.
+                    // Ensure that if the map is zoomed out such that multiple copies of the feature are visible, the popup appears over the copy being pointed to.
                     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                     }
