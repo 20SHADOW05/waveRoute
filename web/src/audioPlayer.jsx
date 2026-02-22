@@ -2,20 +2,20 @@ import { useState, useRef, useEffect } from 'react';
 import { CustomAPtop , GenreCarousel , StationInfo , MiniAudio , Controls } from './otherUi';
 import './AudioPlayer.css'
 
-function CustomAudioPlayer({ toggleTheme , darkMode , mapRef }) {
+function CustomAudioPlayer({ toggleTheme , darkMode , mapRef , selectedGenre , setSelectedGenre }) {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
+    const [hiFiveCount , setHighFiveCount ] = useState(0);
     const [currentStation, setCurrentStation] = useState({
         name: '',
         country: '',
         state: '',
         streamUrl: ''
     });
-    
 
     useEffect(() => {
         audioRef.current = new Audio();
@@ -63,27 +63,29 @@ function CustomAudioPlayer({ toggleTheme , darkMode , mapRef }) {
             const { streamUrl, name } = feature.properties;
             if (!streamUrl) return;
 
-            setErrorMessage(''); // Clear error
+            setErrorMessage('');
             setCurrentStation(feature.properties);
 
             const audio = audioRef.current;
             const currentStream = audio.dataset.currentStream;
 
-            // Always try to play if it's the same broken station OR new station
             if (currentStream !== streamUrl || !isPlaying) {
                 audio.pause();
                 audio.src = streamUrl;
                 audio.dataset.currentStream = streamUrl;
                 audio.play().catch(err => {
                     console.error("Playback failed:", err);
-                    setErrorMessage(`Cannot play "${name}" - Stream unavailable`);
-                    setIsPlaying(false);
+                    if((err.name === 'NotSupportedError' || err.name === 'NotAllowedError')){
+                        setErrorMessage(`Cannot play "${name}" - Stream unavailable`);
+                        setIsPlaying(false);
+                        
+                        setTimeout(() => setErrorMessage(''), 3000);
+                    }
                     
-                    setTimeout(() => setErrorMessage(''), 3000);
                 });
                 setIsPlaying(true);
             } else {
-                // Only toggle if same station AND currently playing
+                // toggle if same station AND currently playing
                 togglePlayPause();
             }
         };
@@ -98,9 +100,9 @@ function CustomAudioPlayer({ toggleTheme , darkMode , mapRef }) {
     return (
         <>
             <div className={`audio-player ${isExpanded ? '' : 'minimized'}`}>
-                <CustomAPtop isExpanded={ isExpanded } setIsExpanded={ setIsExpanded } toggleTheme={ toggleTheme } darkMode={ darkMode } />
+                <CustomAPtop isExpanded={ isExpanded } setIsExpanded={ setIsExpanded } toggleTheme={ toggleTheme } darkMode={ darkMode } hiFiveCount={ hiFiveCount } setHighFiveCount={ setHighFiveCount }/>
 
-                <GenreCarousel isExpanded={ isExpanded } />
+                <GenreCarousel isExpanded={ isExpanded } selectedGenre={ selectedGenre } setSelectedGenre={ setSelectedGenre } />
                     
                 <StationInfo isExpanded={ isExpanded } currentStation={ currentStation } />
 

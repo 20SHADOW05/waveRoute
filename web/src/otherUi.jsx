@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaLinkedin } from "react-icons/fa6";
 import { LuHand , LuMail } from "react-icons/lu";
 import { MdDarkMode , MdLightMode } from "react-icons/md";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { FaChevronLeft, FaChevronRight, FaRegNewspaper } from "react-icons/fa6";
 import { FiHeadphones , FiRadio , FiZap , FiWind , FiFeather , FiDisc , FiActivity , FiSun , FiMinimize2 , FiMaximize2 , FiPlay , FiPause , FiVolumeX , FiVolume2 } from "react-icons/fi";
 
 function Theme({ toggleTheme ,  mode }) {
@@ -18,15 +18,13 @@ function Theme({ toggleTheme ,  mode }) {
 function Links() {
     return (
         <div className="z links">
-            <a href="http://"> <FaLinkedin className="icons"/> </a>
-            <a href="mailto:"> <LuMail className="icons"/> </a>
+            <a href="https://www.linkedin.com/in/ankababu-s-351829358/" target="_blank"> <FaLinkedin className="icons"/> </a>
+            <a href="mailto:ankababu774@gmail.com"> <LuMail className="icons"/> </a>
         </div>
     );
 }
 
-function HiFive() {
-    const [hiFiveCount , setHighFiveCount ] = useState(0);
-
+function HiFive({ hiFiveCount , setHighFiveCount }) {
     const handleClick = () => {
         setHighFiveCount((count) => count + 1);
     }
@@ -39,14 +37,14 @@ function HiFive() {
     );
 }
 
-function CustomAPtop({ isExpanded , setIsExpanded , toggleTheme , darkMode }) {
+function CustomAPtop({ isExpanded , setIsExpanded , toggleTheme , darkMode , hiFiveCount , setHighFiveCount}) {
     if(isExpanded){
         return (
             <>
                 <div className='overall-top'>
                     <Links />
                     <div className='t-h'>
-                        <HiFive />
+                        <HiFive hiFiveCount={ hiFiveCount } setHighFiveCount={ setHighFiveCount } />
                         <Theme toggleTheme={ toggleTheme } mode={ darkMode } />
                         <div style={{ display: 'flex' }} onClick={() => setIsExpanded(false)} >
                             <FiMinimize2 className="icons-mini theme-in" />
@@ -58,23 +56,22 @@ function CustomAPtop({ isExpanded , setIsExpanded , toggleTheme , darkMode }) {
     }
 }
 
-function GenreCarousel({ isExpanded }){
+function GenreCarousel({ isExpanded, selectedGenre, setSelectedGenre }){
     if(isExpanded){
-        const [selectedGenre, setSelectedGenre] = useState('All');
-    
         const GENRES = [
             { genre: 'All', icon: FiHeadphones },
             { genre: 'Pop', icon: FiRadio },
             { genre: 'Rock', icon: FiZap },
             { genre: 'Jazz', icon: FiWind },
             { genre: 'Classical', icon: FiFeather },
-            { genre: 'Hip Hop', icon: FiDisc },
+            { genre: 'Talk', icon: FiDisc },
             { genre: 'Electronic', icon: FiActivity },
-            { genre: 'Folk', icon: FiSun },
+            { genre: 'Hits', icon: FiSun },
+            { genre: 'News', icon: FaRegNewspaper }
         ];
         const [genreStartIndex, setGenreStartIndex] = useState(0);
         const visibleGenres = 3;
-        const slideAmount = 98;
+        const slideAmount = 95  ;
 
         const scrollGenresLeft = () => {
             if (genreStartIndex > 0) {

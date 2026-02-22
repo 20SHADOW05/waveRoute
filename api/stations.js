@@ -10,13 +10,14 @@ const fetchStations = async () => {
     };
 
     try {
-        const stationsData = await axios.get(`${server_url}/json/stations/search?limit=5000&hidebroken=true&has_geo_info=true&order=clickcount&reverse=true` , { headers , timeout: 20000 });
+        const stationsData = await axios.get(`${server_url}/json/stations/search?limit=6000&hidebroken=true&has_geo_info=true&order=clickcount&reverse=true` , { headers , timeout: 20000 });
         console.log(stationsData);
         console.log("DATA FETCHED");
         const GeoJSON = convertGeoJSON(stationsData.data);
         return GeoJSON;
     } catch(error) {
-        console.log(error);
+        console.error("Fetch error:", error.message);
+        return null;
     }
 }
 
@@ -38,7 +39,9 @@ const convertGeoJSON = (allStations) => {
                     countryCode: station.countrycode,
                     state: station.state,
                     streamUrl: station.url_resolved || station.url,
-                    tags: station.tags,
+                    tags: station.tags
+                        ? station.tags.split(',').map(t => t.trim().toLowerCase())
+                        : [],
                     language: station.language,
                     codec: station.codec,
                     bitrate: station.bitrate,

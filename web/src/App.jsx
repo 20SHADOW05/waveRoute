@@ -8,6 +8,8 @@ export default function Map() {
 	const containerRef = useRef(null);
 	const mapRef = useRef(null);
 	let [stationsData , setStationsData] = useState(null);
+    const selectedRef = useRef(null);
+    const [selectedGenre, setSelectedGenre] = useState('All');
 
     function toggleTheme() {
         const html = document.documentElement;
@@ -18,9 +20,9 @@ export default function Map() {
 	useEffect(() => {
 		const getStationsData = async () => {
 			try {
-				const stationsDataPromise = await fetch('http://localhost:3000/getStations'); // fetch returns a promise
+				const stationsDataPromise = await fetch('http://localhost:3000/getStations');
 				let Data = await stationsDataPromise.json(); // this method is used to read and parse a http response (JSON.parse is only for json string)
-				console.log(Data.data.features.length);
+				console.log(Data.data.features.length , "didn't implement clustering because i want it to be visually dense");
 				setStationsData(Data);
 			} catch(error) {
 				console.log(error);
@@ -30,13 +32,10 @@ export default function Map() {
 		getStationsData();
 	} , [])
 
-	// Remove darkMode from map initialization useEffect
     useEffect(() => {
         mapRef.current = new maplibregl.Map({
             container: containerRef.current,
-            style: document.documentElement.classList.contains('dark') 
-                ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
-                : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+            style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
             zoom: 0,
             renderWorldCopies: false,
             attributionControl: false,
@@ -63,73 +62,136 @@ export default function Map() {
         
         const map = mapRef.current;
         
+        const popup = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        }).setMaxWidth("300px");
+
+        let currentFeatureCoordinates = undefined;
+
+        const handleMouseMove = (e) => {
+            const featureCoordinates = e.features[0].geometry.coordinates.toString();
+            if (currentFeatureCoordinates !== featureCoordinates) {
+                currentFeatureCoordinates = featureCoordinates;
+                map.getCanvas().style.cursor = 'pointer';
+
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const { name, country } = e.features[0].properties;
+
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                popup.setLngLat(coordinates).setHTML(`${name} 
+                    <div class="cName">${country || ''}</div>`).addTo(map);
+            }
+        };
+
+        const handleMouseLeave = () => {
+            currentFeatureCoordinates = undefined;
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        };
+        
         const addStations = () => {
             if (map.getSource('stations')) {
-                map.removeLayer('station-points');
+                if (map.getLayer('station-aura')) map.removeLayer('station-aura');
+                if (map.getLayer('station-points')) map.removeLayer('station-points');
                 map.removeSource('stations');
             }
-            
-            // Add GeoJSON source
-            map.addSource('stations', stationsData);
-            
+
+            map.addSource('stations', {
+                type: 'geojson',
+                data: stationsData.data,
+                promoteId: 'id'
+            });
+
+            map.addLayer({
+                id: 'station-aura',
+                type: 'circle',
+                source: 'stations',
+                paint: {
+                    'circle-radius': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        14,
+                        0
+                    ],
+                    'circle-color': '#db3c3c',
+                    'circle-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        0.25,
+                        0
+                    ]
+                }
+            });
+
             map.addLayer({
                 id: 'station-points',
                 type: 'circle',
                 source: 'stations',
-                paint: document.documentElement.classList.contains('dark') ?
-                        {
-                            'circle-radius': 4,
-                            'circle-color': 'rgb(210, 210, 210)', 
-                            'circle-stroke-width': 1,
-                            'circle-stroke-color': '#000000'
-                        } 
-                        : {
-                            'circle-radius': 4,
-                            'circle-color': 'rgb(80, 80, 80)', 
-                            'circle-stroke-width': 1,
-                            'circle-stroke-color': '#ffffff'
-                        } 
-            });
-            
-            const popup = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false
-            }).setMaxWidth("300px");
-
-            let currentFeatureCoordinates = undefined;
-            map.on('mousemove', 'station-points', (e) => { // thanks to mapLibre docs for this hover popup
-                const featureCoordinates = e.features[0].geometry.coordinates.toString();
-                if (currentFeatureCoordinates !== featureCoordinates) {
-                    currentFeatureCoordinates = featureCoordinates;
-
-                    // Change the cursor style as a UI indicator.
-                    map.getCanvas().style.cursor = 'pointer';
-
-                    const coordinates = e.features[0].geometry.coordinates.slice();
-                    const { name, country } = e.features[0].properties;
-
-                    // Ensure that if the map is zoomed out such that multiple copies of the feature are visible, the popup appears over the copy being pointed to.
-                    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                    }
-
-                    // Populate the popup and set its coordinates based on the feature found.
-                    popup.setLngLat(coordinates).setHTML(`${name} 
-                        <div class="cName">${country || ''}</div>`).addTo(map);
+                paint: {
+                    'circle-radius': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        6.4,
+                        3.2
+                    ],
+                    'circle-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        '#db3c3c',
+                        darkMode ? 'rgb(210,210,210)' : 'rgb(80,80,80)'
+                    ],
+                    'circle-stroke-width': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        0,
+                        1
+                    ],
+                    'circle-stroke-color': darkMode ? '#000000' : '#ffffff'
                 }
             });
 
-            map.on('mouseleave', 'station-points', () => {
-                currentFeatureCoordinates = undefined;
-                map.getCanvas().style.cursor = '';
-                popup.remove();
-            });
+            if (selectedRef.current !== null) {
+                map.setFeatureState(
+                    { source: 'stations', id: selectedRef.current },
+                    { selected: true }
+                );
+            }
+
+            if (selectedGenre !== 'All') {
+                const filter = ['in', selectedGenre.toLowerCase(), ['get', 'tags']];
+                map.setFilter('station-points', filter);
+                map.setFilter('station-aura', filter);
+            }
+
+            map.on('mousemove', 'station-points', handleMouseMove);
+            map.on('mouseleave', 'station-points', handleMouseLeave);
+            map.on('click', 'station-points', handleStationClick);
         };
-        
-        // Listen for style changes (when theme toggles)
+
+        const handleStationClick = (e) => {
+            const id = e.features[0].properties.id;
+
+            if (selectedRef.current !== null) {
+                map.setFeatureState(
+                    { source: 'stations', id: selectedRef.current },
+                    { selected: false }
+                );
+            }
+
+            map.setFeatureState(
+                { source: 'stations', id },
+                { selected: true }
+            );
+
+            selectedRef.current = id;
+        };
+
         map.on('style.load', addStations);
         
-        // Add stations on initial load
         if (map.isStyleLoaded()) {
             addStations();
         } else {
@@ -138,14 +200,36 @@ export default function Map() {
         
         return () => {
             map.off('style.load', addStations);
+            map.off('mousemove', 'station-points', handleMouseMove);
+            map.off('mouseleave', 'station-points', handleMouseLeave);
+            map.off('click', 'station-points', handleStationClick);
         };
         
-    }, [stationsData , darkMode]);
+    }, [stationsData ,  darkMode]);
+
+    useEffect(() => {
+        if (!mapRef.current) return;
+        const map = mapRef.current;
+
+        if (!map.getLayer('station-points')) return;
+
+        if (selectedGenre === 'All') {
+            map.setFilter('station-points', null);
+            map.setFilter('station-aura', null);
+        } else {
+            const filter = ['in', selectedGenre.toLowerCase(), ['get', 'tags']];
+
+            map.setFilter('station-points', filter);
+            map.setFilter('station-aura', filter);
+        }
+
+    }, [selectedGenre]);
 
 	return (
 		<>
-			<div ref={containerRef} style={{ position: 'absolute', width: '100vw', height: '99.5vh'}}> </div>
-            <CustomAudioPlayer toggleTheme={ toggleTheme } darkMode={ darkMode } mapRef={ mapRef.current } />
+			<div ref={containerRef} style={{ position: 'absolute', width: '100vw', height: '100vh'}}> </div>
+            <CustomAudioPlayer toggleTheme={ toggleTheme } darkMode={ darkMode } mapRef={ mapRef.current } selectedGenre={selectedGenre}
+            setSelectedGenre={setSelectedGenre}/>
 		</>
 	);
 }
