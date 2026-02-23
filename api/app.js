@@ -2,16 +2,22 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const compression = require('compression');
+const helmet = require('helmet');
 
 const NodeCache = require('node-cache');
 const myCache = new NodeCache( { stdTTL: 0 } );
 
 const fetchStations = require('./stations');
 
+app.use(helmet());
 app.use(compression());
 app.use(express.static('public'));
 app.use(express.urlencoded( { extended: true} ));
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: true }));
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+});
 
 const CACHE_KEY = "stationsData";
 const REFRESH_INTERVAL = 24 * 60 * 60 * 1000;

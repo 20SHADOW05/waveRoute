@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaLinkedin } from "react-icons/fa6";
-import { LuHand , LuMail } from "react-icons/lu";
+import { LuMail } from "react-icons/lu";
 import { MdDarkMode , MdLightMode } from "react-icons/md";
 import { FaChevronLeft, FaChevronRight, FaRegNewspaper } from "react-icons/fa6";
 import { FiHeadphones , FiRadio , FiZap , FiWind , FiFeather , FiDisc , FiActivity , FiSun , FiMinimize2 , FiMaximize2 , FiPlay , FiPause , FiVolumeX , FiVolume2 } from "react-icons/fi";
@@ -9,7 +9,7 @@ function Theme({ toggleTheme ,  mode }) {
     return (
         <div onClick={ toggleTheme } className="z theme-in">
             {
-                { mode } == true ? <MdDarkMode className="icons"/> : <MdLightMode className="icons"/>
+                mode === true ? <MdDarkMode className="icons"/> : <MdLightMode className="icons"/>
             }
         </div>
     );
@@ -24,27 +24,13 @@ function Links() {
     );
 }
 
-function HiFive({ hiFiveCount , setHighFiveCount }) {
-    const handleClick = () => {
-        setHighFiveCount((count) => count + 1);
-    }
-
-    return (
-        <div className="z hi5" onClick={ handleClick } >
-            <LuHand className="icons"/>
-            <div style={{ maxwidth: '120px' , fontFamily: 'noto' , color: 'var(--icon-color)' }}> { hiFiveCount } </div>
-        </div>
-    );
-}
-
-function CustomAPtop({ isExpanded , setIsExpanded , toggleTheme , darkMode , hiFiveCount , setHighFiveCount}) {
+function CustomAPtop({ isExpanded , setIsExpanded , toggleTheme , darkMode }) {
     if(isExpanded){
         return (
             <>
                 <div className='overall-top'>
                     <Links />
                     <div className='t-h'>
-                        <HiFive hiFiveCount={ hiFiveCount } setHighFiveCount={ setHighFiveCount } />
                         <Theme toggleTheme={ toggleTheme } mode={ darkMode } />
                         <div style={{ display: 'flex' }} onClick={() => setIsExpanded(false)} >
                             <FiMinimize2 className="icons-mini theme-in" />

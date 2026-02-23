@@ -33,15 +33,21 @@ export default function Map() {
 	} , [])
 
     useEffect(() => {
+        const isMobile = window.innerWidth < 768;
+
         mapRef.current = new maplibregl.Map({
             container: containerRef.current,
             style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-            zoom: 0,
+            zoom: isMobile ? 1.5 : 0,
             renderWorldCopies: false,
             attributionControl: false,
             pitchWithRotate: false,
             dragRotate: false
         });
+
+        mapRef.current.touchZoomRotate.disableRotation();
+        mapRef.current.dragRotate.disable();
+        mapRef.current.keyboard.disableRotation();
 
         return () => {
             mapRef.current.remove();
@@ -166,10 +172,6 @@ export default function Map() {
                 map.setFilter('station-points', filter);
                 map.setFilter('station-aura', filter);
             }
-
-            map.on('mousemove', 'station-points', handleMouseMove);
-            map.on('mouseleave', 'station-points', handleMouseLeave);
-            map.on('click', 'station-points', handleStationClick);
         };
 
         const handleStationClick = (e) => {
@@ -198,6 +200,13 @@ export default function Map() {
             map.once('load', addStations);
         }
         
+        const isMobile = window.matchMedia("(pointer: coarse)").matches;
+        if (!isMobile) {
+            map.on('mousemove', 'station-points', handleMouseMove);
+            map.on('mouseleave', 'station-points', handleMouseLeave);
+        }
+        map.on('click', 'station-points', handleStationClick);
+
         return () => {
             map.off('style.load', addStations);
             map.off('mousemove', 'station-points', handleMouseMove);

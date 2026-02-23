@@ -9,7 +9,6 @@ function CustomAudioPlayer({ toggleTheme , darkMode , mapRef , selectedGenre , s
     const [isMuted, setIsMuted] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
-    const [hiFiveCount , setHighFiveCount ] = useState(0);
     const [currentStation, setCurrentStation] = useState({
         name: '',
         country: '',
@@ -76,7 +75,7 @@ function CustomAudioPlayer({ toggleTheme , darkMode , mapRef , selectedGenre , s
                 audio.play().catch(err => {
                     console.error("Playback failed:", err);
                     if((err.name === 'NotSupportedError' || err.name === 'NotAllowedError')){
-                        setErrorMessage(`Cannot play "${name}" - Stream unavailable`);
+                        setErrorMessage("Playback failed - Stream not available");
                         setIsPlaying(false);
                         
                         setTimeout(() => setErrorMessage(''), 3000);
@@ -100,7 +99,7 @@ function CustomAudioPlayer({ toggleTheme , darkMode , mapRef , selectedGenre , s
     return (
         <>
             <div className={`audio-player ${isExpanded ? '' : 'minimized'}`}>
-                <CustomAPtop isExpanded={ isExpanded } setIsExpanded={ setIsExpanded } toggleTheme={ toggleTheme } darkMode={ darkMode } hiFiveCount={ hiFiveCount } setHighFiveCount={ setHighFiveCount }/>
+                <CustomAPtop isExpanded={ isExpanded } setIsExpanded={ setIsExpanded } toggleTheme={ toggleTheme } darkMode={ darkMode } />
 
                 <GenreCarousel isExpanded={ isExpanded } selectedGenre={ selectedGenre } setSelectedGenre={ setSelectedGenre } />
                     

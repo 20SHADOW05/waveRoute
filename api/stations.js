@@ -11,8 +11,8 @@ const fetchStations = async () => {
 
     try {
         const stationsData = await axios.get(`${server_url}/json/stations/search?limit=6000&hidebroken=true&has_geo_info=true&order=clickcount&reverse=true` , { headers , timeout: 20000 });
-        console.log(stationsData);
-        console.log("DATA FETCHED");
+        // console.log(stationsData.data.length);
+        // console.log("DATA FETCHED");
         const GeoJSON = convertGeoJSON(stationsData.data);
         return GeoJSON;
     } catch(error) {
@@ -75,7 +75,7 @@ const validateStation = (station) => {
         if(!detectedCountry) return false;
         if(detectedCountry !== station.countrycode && station.countrycode) return false;
     } catch (error) {
-        console.log(`Error detecting country for ${station.name}:`, error.message);
+        // console.log(`Error detecting country for ${station.name}:`, error.message);
         return false;
     }
 
