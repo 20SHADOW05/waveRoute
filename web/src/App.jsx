@@ -75,7 +75,7 @@ export default function Map() {
 
         let currentFeatureCoordinates = undefined;
 
-        const handleMouseMove = (e) => {
+        const handleMouseMove = (e) => { // thanks to mapLibre docs for this hover popup
             const featureCoordinates = e.features[0].geometry.coordinates.toString();
             if (currentFeatureCoordinates !== featureCoordinates) {
                 currentFeatureCoordinates = featureCoordinates;
@@ -83,11 +83,13 @@ export default function Map() {
 
                 const coordinates = e.features[0].geometry.coordinates.slice();
                 const { name, country } = e.features[0].properties;
-
+                
+                // Ensure that if the map is zoomed out such that multiple copies of the feature are visible, the popup appears over the copy being pointed 
                 while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                 }
 
+                // Populate the popup and set its coordinates based on the feature found.
                 popup.setLngLat(coordinates).setHTML(`${name} 
                     <div class="cName">${country || ''}</div>`).addTo(map);
             }
