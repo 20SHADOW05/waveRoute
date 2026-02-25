@@ -3,6 +3,8 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { CustomAudioPlayer } from './audioPlayer.jsx';
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function Map() {
     const [darkMode, setDarkMode] = useState(true);
 	const containerRef = useRef(null);
@@ -20,7 +22,7 @@ export default function Map() {
 	useEffect(() => {
 		const getStationsData = async () => {
 			try {
-				const stationsDataPromise = await fetch('http://localhost:3000/getStations');
+				const stationsDataPromise = await fetch(`${API_BASE}/getStations`);
 				let Data = await stationsDataPromise.json(); // this method is used to read and parse a http response (JSON.parse is only for json string)
 				console.log(Data.data.features.length , "didn't implement clustering because i want it to be visually dense");
 				setStationsData(Data);

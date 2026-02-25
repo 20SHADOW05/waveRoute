@@ -39,7 +39,7 @@ const convertGeoJSON = (allStations) => {
                     countryCode: station.countrycode,
                     state: station.state,
                     streamUrl: station.url_resolved || station.url,
-                    tags: station.tags
+                    tags: station.tags && typeof station.tags === 'string'  // Fix null tags
                         ? station.tags.split(',').map(t => t.trim().toLowerCase())
                         : [],
                     language: station.language,
